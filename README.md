@@ -17,3 +17,11 @@ A RESTful API service that analyzes strings and stores their computed properties
 {
   "value": "string to analyze"
 }
+```
+## install Dependencies
+* npm install
+
+### Run the Server
+ * npm start 
+ * npm run dev
+
