@@ -82,11 +82,6 @@ const getString = async(req, res) =>{
     try {
          // string_value is url-encoded; decode it
   const param = decodeURIComponent(req.params.string_value);
-  console.log("Requested string_value:", req.params.string_value);
-  console.log("Params:", req.params);
-  console.log("storeByValue keys:", Array.from(storeByValue.keys()));
-  console.log("storeByHash keys:", Array.from(storeByHash.keys()));
-
   let record = findByValue(param);
 
   // If not found, maybe it's the hash
