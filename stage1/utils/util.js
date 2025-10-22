@@ -16,7 +16,8 @@ const sha256Hex = (value) => {
 const analyzeString = (value) => {
   const id = sha256Hex(value);
   const length = value.length;
-  const normalized = value.toLowerCase();
+
+  const normalized = value.toLowerCase(); //
   const is_palindrome = normalized === normalized.split('').reverse().join('');
 
   // character frequency map (counts every code unit)
@@ -34,7 +35,7 @@ const analyzeString = (value) => {
     length: value.length,
     is_palindrome,
     unique_characters: Object.keys(frequency).length,
-    word_count,
+    word_count: value.trim() ? value.trim().split(/\s+/).length : 0,
     sha256_hash: id,
     character_frequency_map: frequency
     // length: number,
@@ -48,9 +49,9 @@ const analyzeString = (value) => {
 
 // Helper to find by raw string value (exact match)
 const findByValue = (value) => {
-  const id = storeByValue.get(value);
+  const id = storeByValue?.get(value);
   if (!id) return null;
-  return storeByHash.get(id) || null;
+  return storeByHash?.get(id) || null;
 }
  
 //Get All Strings with Filtering

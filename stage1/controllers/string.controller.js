@@ -25,22 +25,54 @@ const createString = async(req, res) =>{
     // Simulate string creation and analysis logic
     try {
         const { value } = req.body;
-        // Validate input
-        if (!value || typeof value !== 'string') {
-        return res.status(422).json({ message: 'Invalid value' });
+        // // Validate input
+        // if (!value || typeof value !== 'string') {
+        // return res.status(422).json({ message: 'Invalid value' });
+        //   }
+
+        //   const id = sha256Hex(value); // compute SHA-256 hash as ID
+        //   // Check for duplicates
+        //   if (storeByHash.has(id)) {
+        //     return res.status(409).json({ message: 'String already exists in the system' });
+        //   }
+        //   const properties = analyzeString(value);
+
+        //   const created_at = new Date().toISOString();
+
+        //UPDATED CODE
+        //  handle missing or invalid input
+          if (typeof value !== "string" || value.trim() === "") {
+            return res.status(422).json({ message: "Missing or invalid 'value' field" });
           }
 
-          const id = sha256Hex(value); // compute SHA-256 hash as ID
+          const normalized = value.trim().toLowerCase();
+          // Duplicate detection (case-insensitive)
+          if (storeByValue.has(normalized)) {
+            return res.status(409).json({ message: "String already exists in the system" });
+          }
+
+          // const id = sha256Hex(normalized);
+          const id = sha256Hex(value.trim()); // compute SHA-256 hash as ID
           // Check for duplicates
           if (storeByHash.has(id)) {
-            return res.status(409).json({ message: 'String already exists in the system' });
+            return res.status(409).json({ message: "String already exists in the system" });
           }
-          const properties = analyzeString(value);
-          const created_at = new Date().toISOString();
-          const record = { id, value, properties, created_at };
+          // const properties = analyzeString(normalized);
+          const properties = analyzeString(value.trim());
+
+          const record = {
+            id,
+            // value: normalized,
+            value: value.trim(),
+            properties,
+            created_at: new Date().toISOString(),
+          };
+          // const record = { id, value, properties, created_at };
         
+          // Store in both maps
           storeByHash.set(id, record);
-          storeByValue.set(value, id);
+          storeByValue.set(normalized, id);
+          // storeByValue.set(value, id);
         
           return res.status(201).json(record);
 
@@ -63,6 +95,10 @@ const getString = async(req, res) =>{
     try {
          // string_value is url-encoded; decode it
   const param = decodeURIComponent(req.params.string_value);
+  console.log("Requested string_value:", req.params.string_value);
+    console.log("Params:", req.params);
+console.log("storeByValue keys:", Array.from(storeByValue.keys()));
+console.log("storeByHash keys:", Array.from(storeByHash.keys()));
 
   let record = findByValue(param);
 
@@ -123,7 +159,8 @@ const getAllStrings = async(req, res) =>{
       results.push(record);
     }
 
-    return res.status(200).json({ data: results, count: results.length, filters_applied: 
+    return res.status(200).json({ data: results, count: results.length, 
+      filters_applied: 
         { is_palindrome: parsedIsPalindrome,
          min_length: parsedMin, max_length: parsedMax, 
          word_count: parsedWordCount, contains_character }
@@ -139,6 +176,7 @@ const getAllStrings = async(req, res) =>{
 const filterByNaturalLanguage = async (req, res) => {
     const { query } = req.query;
   if (!query) return res.status(400).json({ message: 'Missing query parameter' });
+
   try {
     const interpreted = parseNaturalLanguageQuery(query);
     // reuse /strings filtering logic by applying interpreted.parsed_filters
@@ -168,6 +206,58 @@ const filterByNaturalLanguage = async (req, res) => {
     return res.status(422).json({ message: 'Query parsed but resulted in conflicting filters' });
   }
 }
+
+//NEW UPDATED CODE FOR FILTER BY NATURAL LANGUAGE QUERY
+// const filterByNaturalLanguage = async (req, res) => {
+//   try {
+//     const { q } = req.query;
+//     if (!q) {
+//       return res.status(422).json({ message: "Missing query parameter: q" });
+//     }
+
+//     let parsed;
+//     try {
+//       parsed = parseNaturalLanguageQuery(q);
+//     } catch {
+//       // Instead of 400, return a valid empty 200 response
+//       return res.status(200).json({
+//         data: [],
+//         count: 0,
+//         filters_applied: {},
+//       });
+//     }
+
+//     // Apply parsed filters
+//     const results = [];
+//     for (const record of storeByHash.values()) {
+//       const props = record.properties;
+//       let matches = true;
+
+//       const filters = parsed.parsed_filters;
+
+//       if (filters.is_palindrome && !props.is_palindrome) matches = false;
+//       if (filters.word_count && props.word_count !== filters.word_count) matches = false;
+//       if (filters.min_length && props.length < filters.min_length) matches = false;
+//       if (
+//         filters.contains_character &&
+//         !record.value.toLowerCase().includes(filters.contains_character)
+//       )
+//         matches = false;
+
+//       if (matches) results.push(record);
+//     }
+
+//     return res.status(200).json({
+//       data: results,
+//       count: results.length,
+//       filters_applied: parsed.parsed_filters,
+//     });
+//   } catch (err) {
+//     console.error("Error filtering strings:", err.message);
+//     return res.status(500).json({ message: "Server error" });
+//   }
+// };
+
 
 
 //DELETE STRING

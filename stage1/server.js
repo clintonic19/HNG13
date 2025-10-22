@@ -7,9 +7,18 @@ const PORT = process.env.PORT || 8080;
 
 // Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 // Routes
 app.use('/strings', stringsRouter );
+
+// app.use((err, req, res, next) => {
+//   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+//     return res.status(400).json({ message: 'Invalid JSON body' });
+//   }
+//   next();
+// });
 
 // // Health check endpoint
 // app.get('/health', (req, res) => {
