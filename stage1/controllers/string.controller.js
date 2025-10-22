@@ -9,17 +9,6 @@ const {
 const crypto = require('crypto');
 
 
-// In-memory store:
-// Map from sha256 -> record { id, value, properties, created_at }
-// const storeByHash = new Map();
-// Also keep a Map from raw string value -> sha (so GET/DELETE by string_value works fast)
-// const storeByValue = new Map();
-
-// Utility: compute SHA-256 hex
-// function sha256Hex(value) {
-//   return crypto.createHash('sha256').update(value, 'utf8').digest('hex');
-// }
-
 //CREATE AND ANALYZE STRING
 const createString = async(req, res) =>{
     // Simulate string creation and analysis logic
@@ -89,16 +78,45 @@ const createString = async(req, res) =>{
     }
 }
 
+// const createString = async(req, res) =>{
+//   try {
+//     const { value } = req.body;
+
+//   if (!value || typeof value !== 'string') {
+//     return res.status(422).json({ message: 'Invalid string value' });
+//   }
+
+//   // Check if string already exists
+//   if (storeByValue.has(value)) {
+//     return res.status(409).json({ message: 'String already exists' });
+//   }
+
+//   const analyzed = analyzeString(value);
+//   storeByHash.set(analyzed.sha256_hash, { value, ...analyzed, created_at: new Date() });
+//   storeByValue.set(value, analyzed.sha256_hash);
+
+//   return res.status(201).json({ message: 'String stored', string: analyzed });
+//   } catch (error) {
+//     console.error("Error creating string", error.message);
+//     res.status(500).json({
+//       status: "error",
+//       message: "Failed to create string",
+//     });
+//   }
+// }
+
+
 
 //GET SPECIFIC STRING
+
 const getString = async(req, res) =>{
     try {
          // string_value is url-encoded; decode it
   const param = decodeURIComponent(req.params.string_value);
   console.log("Requested string_value:", req.params.string_value);
-    console.log("Params:", req.params);
-console.log("storeByValue keys:", Array.from(storeByValue.keys()));
-console.log("storeByHash keys:", Array.from(storeByHash.keys()));
+  console.log("Params:", req.params);
+  console.log("storeByValue keys:", Array.from(storeByValue.keys()));
+  console.log("storeByHash keys:", Array.from(storeByHash.keys()));
 
   let record = findByValue(param);
 
@@ -119,7 +137,6 @@ console.log("storeByHash keys:", Array.from(storeByHash.keys()));
         });
     }
 }
-
 
 //GET ALL STRINGS WITH FILTERING
 const getAllStrings = async(req, res) =>{
@@ -259,15 +276,14 @@ const filterByNaturalLanguage = async (req, res) => {
 // };
 
 
-
 //DELETE STRING
 const deleteString = async(req, res) =>{
     try {
-        const raw = decodeURIComponent(req.params.string_value);
-        const record = findByValue(raw);
+        const value = decodeURIComponent(req.params.string_value);
+        const record = findByValue(value);
         if (!record) return res.status(404).json({ message: 'String does not exist in the system' });
         storeByHash.delete(record.id);
-        storeByValue.delete(raw);
+        storeByValue.delete(value.toLowerCase());
         
         // return res.status(200).json({
         //     message: 'String deleted successfully'
