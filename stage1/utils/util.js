@@ -31,12 +31,17 @@ const analyzeString = (value) => {
   const word_count = words.length;
 
   return {
-    length,
+    length: value.length,
     is_palindrome,
-    unique_characters,
+    unique_characters: Object.keys(frequency).length,
     word_count,
     sha256_hash: id,
     character_frequency_map: frequency
+    // length: number,
+    // isPalindrome: boolean,
+    // lowercase: string,
+    // uppercase: string,
+    // sha256: string
   };
   
 }

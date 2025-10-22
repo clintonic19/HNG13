@@ -25,11 +25,16 @@ const createString = async(req, res) =>{
     // Simulate string creation and analysis logic
     try {
         const { value } = req.body;
-          const id = sha256Hex(value);
+        // Validate input
+        if (!value || typeof value !== 'string') {
+        return res.status(422).json({ message: 'Invalid value' });
+          }
+
+          const id = sha256Hex(value); // compute SHA-256 hash as ID
+          // Check for duplicates
           if (storeByHash.has(id)) {
             return res.status(409).json({ message: 'String already exists in the system' });
           }
-        
           const properties = analyzeString(value);
           const created_at = new Date().toISOString();
           const record = { id, value, properties, created_at };
@@ -40,7 +45,8 @@ const createString = async(req, res) =>{
           return res.status(201).json(record);
 
     } catch (error) {
-         console.error("Error creating string", error.message);
+         
+      console.error("Error creating string", error.message);
   
       // Error response
       res.status(500).json({
@@ -56,9 +62,14 @@ const createString = async(req, res) =>{
 const getString = async(req, res) =>{
     try {
          // string_value is url-encoded; decode it
-  const rawValue= decodeURIComponent(req.params.string_value);
+  const param = decodeURIComponent(req.params.string_value);
 
-  const record = findByValue(rawValue);
+  let record = findByValue(param);
+
+  // If not found, maybe it's the hash
+    if (!record && storeByHash.has(param)) {
+      record = storeByHash.get(param);
+    }
 
   if (!record) return res.status(404).json({ message: 'String does not exist in the system' });
 
@@ -167,11 +178,14 @@ const deleteString = async(req, res) =>{
         if (!record) return res.status(404).json({ message: 'String does not exist in the system' });
         storeByHash.delete(record.id);
         storeByValue.delete(raw);
-        return res.status(204).send({
-            message: 'String deleted successfully'
-        });
+        
+        // return res.status(200).json({
+        //     message: 'String deleted successfully'
+        // });
+        return res.status(204).send();
+
     } catch (error) {
-        console.error(error);
+        console.error("Error deleting strings", error.message);
         return res.status(500).json({ message: 'Server error' });
     }
 }

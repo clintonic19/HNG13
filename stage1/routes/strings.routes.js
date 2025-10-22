@@ -10,14 +10,14 @@ router.post('/', validateCreateBody, createString);
 // GET /strings - Get All Strings with Filtering
 router.get('/', getAllStrings);
 
-// GET /strings/{string_value} - Get Specific String
-router.get('/strings/:string_value', getString);
-
 // GET /strings/filter-by-natural-language - Natural Language Filtering
-router.get('/strings/filter-by-natural-language', filterByNaturalLanguage);
+router.get('/filter-by-natural-language', filterByNaturalLanguage);
+
+// GET /strings/{string_value} - Get Specific String
+router.get('/:string_value', getString);
 
 // DELETE /strings/{string_value} - Delete String
-router.delete('/strings/:string_value', deleteString);
+router.delete('/:string_value', deleteString);
 
 
 
