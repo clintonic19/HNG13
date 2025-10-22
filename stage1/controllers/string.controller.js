@@ -78,37 +78,6 @@ const createString = async(req, res) =>{
     }
 }
 
-// const createString = async(req, res) =>{
-//   try {
-//     const { value } = req.body;
-
-//   if (!value || typeof value !== 'string') {
-//     return res.status(422).json({ message: 'Invalid string value' });
-//   }
-
-//   // Check if string already exists
-//   if (storeByValue.has(value)) {
-//     return res.status(409).json({ message: 'String already exists' });
-//   }
-
-//   const analyzed = analyzeString(value);
-//   storeByHash.set(analyzed.sha256_hash, { value, ...analyzed, created_at: new Date() });
-//   storeByValue.set(value, analyzed.sha256_hash);
-
-//   return res.status(201).json({ message: 'String stored', string: analyzed });
-//   } catch (error) {
-//     console.error("Error creating string", error.message);
-//     res.status(500).json({
-//       status: "error",
-//       message: "Failed to create string",
-//     });
-//   }
-// }
-
-
-
-//GET SPECIFIC STRING
-
 const getString = async(req, res) =>{
     try {
          // string_value is url-encoded; decode it
@@ -224,72 +193,18 @@ const filterByNaturalLanguage = async (req, res) => {
   }
 }
 
-//NEW UPDATED CODE FOR FILTER BY NATURAL LANGUAGE QUERY
-// const filterByNaturalLanguage = async (req, res) => {
-//   try {
-//     const { q } = req.query;
-//     if (!q) {
-//       return res.status(422).json({ message: "Missing query parameter: q" });
-//     }
-
-//     let parsed;
-//     try {
-//       parsed = parseNaturalLanguageQuery(q);
-//     } catch {
-//       // Instead of 400, return a valid empty 200 response
-//       return res.status(200).json({
-//         data: [],
-//         count: 0,
-//         filters_applied: {},
-//       });
-//     }
-
-//     // Apply parsed filters
-//     const results = [];
-//     for (const record of storeByHash.values()) {
-//       const props = record.properties;
-//       let matches = true;
-
-//       const filters = parsed.parsed_filters;
-
-//       if (filters.is_palindrome && !props.is_palindrome) matches = false;
-//       if (filters.word_count && props.word_count !== filters.word_count) matches = false;
-//       if (filters.min_length && props.length < filters.min_length) matches = false;
-//       if (
-//         filters.contains_character &&
-//         !record.value.toLowerCase().includes(filters.contains_character)
-//       )
-//         matches = false;
-
-//       if (matches) results.push(record);
-//     }
-
-//     return res.status(200).json({
-//       data: results,
-//       count: results.length,
-//       filters_applied: parsed.parsed_filters,
-//     });
-//   } catch (err) {
-//     console.error("Error filtering strings:", err.message);
-//     return res.status(500).json({ message: "Server error" });
-//   }
-// };
-
 
 //DELETE STRING
 const deleteString = async(req, res) =>{
     try {
         const value = decodeURIComponent(req.params.string_value);
-        const {string_value } = req.params;
 
         const record = findByValue(value);
         if (!record) return res.status(404).json({ message: 'String does not exist in the system' });
+        
         storeByHash.delete(record.id);
         storeByValue.delete(value.toLowerCase());
-        
-        // return res.status(200).json({
-        //     message: 'String deleted successfully'
-        // });
+
         return res.status(204).send();
 
     } catch (error) {

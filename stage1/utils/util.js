@@ -34,8 +34,8 @@ const analyzeString = (value) => {
   return {
     length: value.length,
     is_palindrome,
-    unique_characters: Object.keys(frequency).length,
-    word_count: value.trim() ? value.trim().split(/\s+/).length : 0,
+    unique_characters,
+    word_count,
     sha256_hash: id,
     character_frequency_map: frequency
     // length: number,
