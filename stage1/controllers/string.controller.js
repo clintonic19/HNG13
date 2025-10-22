@@ -280,6 +280,8 @@ const filterByNaturalLanguage = async (req, res) => {
 const deleteString = async(req, res) =>{
     try {
         const value = decodeURIComponent(req.params.string_value);
+        const {string_value } = req.params;
+
         const record = findByValue(value);
         if (!record) return res.status(404).json({ message: 'String does not exist in the system' });
         storeByHash.delete(record.id);

@@ -27,7 +27,7 @@ app.use('/strings', stringsRouter );
 
 // 404 handler
 // Default 404 should be LAST
-app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
+// app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
